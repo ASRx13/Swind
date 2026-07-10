@@ -1,0 +1,1 @@
+# Swind Platform — FastAPI Backend
