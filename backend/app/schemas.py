@@ -4,6 +4,8 @@ Swind Platform — Pydantic Schemas
 Request / response models for API validation and serialisation.
 """
 
+from datetime import datetime
+from typing import List, Optional
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -24,7 +26,66 @@ class ForgotPassword(BaseModel):
     email: EmailStr
 
 
+class ProjectCreate(BaseModel):
+    name: str = Field(..., min_length=2)
+    region: str = Field(..., min_length=2)
+    description: Optional[str] = None
+
+
+class SiteCreate(BaseModel):
+    name: str = Field(..., min_length=2)
+    latitude: float = Field(..., ge=-90.0, le=90.0)
+    longitude: float = Field(..., ge=-180.0, le=180.0)
+    region: str
+    land_area: float = Field(..., gt=0.0)  # in hectares
+    elevation: Optional[float] = 0.0
+    existing_infrastructure: Optional[str] = "Road Access, Substation nearby"
+    land_ownership: str = "Private"
+
+
 # ── Response schemas ─────────────────────────────────────
+
+class SiteResponse(BaseModel):
+    id: int
+    project_id: int
+    name: str
+    latitude: float
+    longitude: float
+    region: str
+    land_area: float
+    elevation: Optional[float]
+    existing_infrastructure: Optional[str]
+    land_ownership: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ProjectResponse(BaseModel):
+    id: int
+    project_code: str
+    name: str
+    region: str
+    description: Optional[str]
+    created_at: datetime
+    sites: List[SiteResponse] = []
+
+    class Config:
+        from_attributes = True
+
+
+class UserProfileResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    created_at: datetime
+    total_projects: int = 0
+    total_sites: int = 0
+
+    class Config:
+        from_attributes = True
+
 
 class UserResponse(BaseModel):
     id: int
@@ -43,3 +104,4 @@ class TokenResponse(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+

@@ -1,6 +1,6 @@
 /**
  * Swind Platform — API Client
- * 
+ *
  * Single point for all API communication.
  * Wraps fetch() with JSON handling and auth token attachment.
  */
@@ -9,13 +9,13 @@ const API_BASE = '';  // Same origin; relative paths
 
 /**
  * Make an API request.
- * 
+ *
  * @param {string} endpoint  - API path, e.g. '/api/auth/login'
  * @param {string} method    - HTTP method
  * @param {object|null} body - Request body (will be JSON-stringified)
  * @returns {Promise<object>} Parsed JSON response
  */
-async function apiRequest(endpoint, method = 'GET', body = null) {
+export async function apiRequest(endpoint, method = 'GET', body = null) {
   const headers = {
     'Content-Type': 'application/json',
   };

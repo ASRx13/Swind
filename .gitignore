@@ -1,7 +1,13 @@
-node_modules/
+# Python
 venv/
 __pycache__/
 *.pyc
 .env
 uploads/
 *.egg-info/
+
+# React / Node
+node_modules/
+frontend/dist/
+frontend_old/
+
