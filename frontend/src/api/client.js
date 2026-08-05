@@ -37,10 +37,17 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
 
   try {
     const response = await fetch(`${API_BASE}${endpoint}`, options);
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      // Throw with the server message so callers can display it
+      // 401 Unauthorized handling: Clear stale token & notify app
+      if (response.status === 401 && endpoint !== '/api/auth/login' && endpoint !== '/api/auth/signup') {
+        localStorage.removeItem('swind_token');
+        localStorage.removeItem('swind_user_name');
+        localStorage.removeItem('swind_user_email');
+        window.dispatchEvent(new Event('swind:unauthorized'));
+      }
+
       const error = new Error(data.detail || data.message || 'Something went wrong.');
       error.status = response.status;
       error.data = data;
@@ -49,10 +56,8 @@ export async function apiRequest(endpoint, method = 'GET', body = null) {
 
     return data;
   } catch (err) {
-    // Re-throw API errors as-is
     if (err.status) throw err;
 
-    // Network / parsing errors
     const networkError = new Error('Network error. Please check your connection.');
     networkError.status = 0;
     throw networkError;

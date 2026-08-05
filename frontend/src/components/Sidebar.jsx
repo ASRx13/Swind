@@ -1,25 +1,28 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Sidebar({ onOpenCreateProject }) {
   const { logout } = useAuth();
+  const { darkMode } = useTheme();
   const [logoError, setLogoError] = useState(false);
   const location = useLocation();
 
   const sidebarStyle = {
     width: '260px',
     height: '100vh',
-    background: '#1a1a2e',
+    background: darkMode ? '#1a1a2e' : '#ffffff',
     position: 'fixed',
     left: 0,
     top: 0,
     display: 'flex',
     flexDirection: 'column',
     padding: '1.25rem',
-    color: '#e8eaf0',
-    borderRight: '1px solid rgba(255, 255, 255, 0.06)',
+    color: darkMode ? '#e8eaf0' : '#1e293b',
+    borderRight: darkMode ? '1px solid rgba(255, 255, 255, 0.06)' : '1px solid #e2e8f0',
     zIndex: 100,
+    transition: 'background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease',
   };
 
   const gradientTextStyle = {
@@ -55,8 +58,8 @@ export default function Sidebar({ onOpenCreateProject }) {
     margin: '0.2rem 0',
     borderRadius: '8px',
     cursor: 'pointer',
-    color: isActive ? '#ffffff' : '#b0b8c9',
-    background: isActive ? 'rgba(74, 144, 217, 0.12)' : 'transparent',
+    color: isActive ? (darkMode ? '#ffffff' : '#4a90d9') : (darkMode ? '#b0b8c9' : '#64748b'),
+    background: isActive ? (darkMode ? 'rgba(74, 144, 217, 0.12)' : 'rgba(74, 144, 217, 0.08)') : 'transparent',
     textDecoration: 'none',
     display: 'flex',
     alignItems: 'center',
@@ -69,14 +72,14 @@ export default function Sidebar({ onOpenCreateProject }) {
 
   return (
     <div style={sidebarStyle}>
-      {/* Logo Header */}
+      {/* Logo Header - Uses logo-light.png in Light Mode and logo.png in Dark Mode */}
       <div style={{ padding: '0.5rem 0.5rem 0.75rem 0.5rem', display: 'flex', alignItems: 'center' }}>
         <Link to="/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
           {!logoError ? (
             <img
-              src="/logo.png"
+              src={darkMode ? "/logo.png" : "/logo-light.png"}
               alt="Swind Logo"
-              style={{ height: '85px', width: 'auto', objectFit: 'contain' }}
+              style={{ height: '72px', width: 'auto', objectFit: 'contain' }}
               onError={() => setLogoError(true)}
             />
           ) : null}
@@ -119,7 +122,7 @@ export default function Sidebar({ onOpenCreateProject }) {
         style={{
           background: 'none',
           border: 'none',
-          color: '#6b7a99',
+          color: darkMode ? '#6b7a99' : '#94a3b8',
           padding: '0.75rem 1rem',
           cursor: 'pointer',
           display: 'flex',
@@ -132,7 +135,7 @@ export default function Sidebar({ onOpenCreateProject }) {
           transition: 'all 0.15s ease',
         }}
         onMouseOver={e => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = '#ef4444'; }}
-        onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = '#6b7a99'; }}
+        onMouseOut={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = darkMode ? '#6b7a99' : '#94a3b8'; }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -144,4 +147,3 @@ export default function Sidebar({ onOpenCreateProject }) {
     </div>
   );
 }
-

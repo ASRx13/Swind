@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -10,6 +10,16 @@ L.Icon.Default.mergeOptions({
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
+
+function MapUpdater({ center }) {
+  const map = useMap();
+  useEffect(() => {
+    if (center) {
+      map.setView(center, map.getZoom(), { animate: true });
+    }
+  }, [center[0], center[1]]);
+  return null;
+}
 
 function LocationMarker({ position, setPosition, onSelectLocation }) {
   useMapEvents({
@@ -43,7 +53,8 @@ function LocationMarker({ position, setPosition, onSelectLocation }) {
 
 export default function MapPicker({ initialLat = 26.9124, initialLng = 75.7873, onSelectLocation, height = '280px' }) {
   const [position, setPosition] = useState([initialLat, initialLng]);
-
+  
+  // Sync position when parent changes lat/lng (e.g. from dropdown selection)
   useEffect(() => {
     setPosition([initialLat, initialLng]);
   }, [initialLat, initialLng]);
@@ -51,7 +62,7 @@ export default function MapPicker({ initialLat = 26.9124, initialLng = 75.7873, 
   return (
     <div style={{ height, width: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative' }}>
       <MapContainer 
-        center={position} 
+        center={[initialLat, initialLng]} 
         zoom={6} 
         scrollWheelZoom={true} 
         style={{ height: '100%', width: '100%', zIndex: 1 }}
@@ -60,6 +71,7 @@ export default function MapPicker({ initialLat = 26.9124, initialLng = 75.7873, 
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <MapUpdater center={position} />
         <LocationMarker position={position} setPosition={setPosition} onSelectLocation={onSelectLocation} />
       </MapContainer>
       
@@ -78,7 +90,7 @@ export default function MapPicker({ initialLat = 26.9124, initialLng = 75.7873, 
         border: '1px solid rgba(255,255,255,0.1)',
         pointerEvents: 'none'
       }}>
-        📍 Click map or drag marker to set site location
+        Click map or drag marker to set site location
       </div>
     </div>
   );

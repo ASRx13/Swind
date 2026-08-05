@@ -1,10 +1,13 @@
 """
 Swind Platform — Project & Site Routes
 
-POST /api/projects             -> Create a new project (auto-generates unique Project ID)
-GET  /api/projects             -> List projects for current user
-GET  /api/projects/{id}         -> Get project details + associated sites
-POST /api/projects/{id}/sites   -> Register a candidate site under a project
+POST   /api/projects                    -> Create a new project (auto-generates unique Project ID)
+GET    /api/projects                    -> List projects for current user
+GET    /api/projects/{id}               -> Get project details + associated sites
+PATCH  /api/projects/{id}               -> Rename a project
+DELETE /api/projects/{id}               -> Delete a project and all its sites
+POST   /api/projects/{id}/sites         -> Register a candidate site under a project
+DELETE /api/projects/{id}/sites/{sid}   -> Delete a single site
 """
 
 from typing import List
@@ -14,7 +17,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User, Project, Site
 from ..auth import get_current_user
-from ..schemas import ProjectCreate, ProjectResponse, SiteCreate, SiteResponse
+from ..schemas import ProjectCreate, ProjectRename, ProjectResponse, SiteCreate, SiteResponse
 
 router = APIRouter(prefix='/api/projects', tags=['Projects & Sites'])
 
@@ -89,9 +92,87 @@ def register_site(
         land_area=payload.land_area,
         elevation=payload.elevation,
         existing_infrastructure=payload.existing_infrastructure,
-        land_ownership=payload.land_ownership
+        land_ownership=payload.land_ownership,
+        energy_type=payload.energy_type,
+        country=payload.country,
+        state=payload.state,
+        city=payload.city,
+        boundary_type=payload.boundary_type,
+        boundary_coordinates=payload.boundary_coordinates,
     )
     db.add(site)
     db.commit()
     db.refresh(site)
     return site
+
+
+@router.patch('/{project_id}', response_model=ProjectResponse)
+def rename_project(
+    project_id: int,
+    payload: ProjectRename,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Rename an existing project."""
+    project = db.query(Project).filter(Project.id == project_id, Project.user_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    project.name = payload.name
+    db.commit()
+    db.refresh(project)
+    return project
+
+
+@router.delete('/{project_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_project(
+    project_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete an entire project and all its associated sites."""
+    project = db.query(Project).filter(Project.id == project_id, Project.user_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    db.delete(project)
+    db.commit()
+    return None
+
+
+@router.patch('/{project_id}/sites/{site_id}', response_model=SiteResponse)
+def rename_site(
+    project_id: int,
+    site_id: int,
+    payload: ProjectRename,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Rename a single site within a project."""
+    project = db.query(Project).filter(Project.id == project_id, Project.user_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    site = db.query(Site).filter(Site.id == site_id, Site.project_id == project.id).first()
+    if not site:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site not found")
+    site.name = payload.name
+    db.commit()
+    db.refresh(site)
+    return site
+
+
+@router.delete('/{project_id}/sites/{site_id}', status_code=status.HTTP_204_NO_CONTENT)
+def delete_site(
+    project_id: int,
+    site_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a single site from a project."""
+    project = db.query(Project).filter(Project.id == project_id, Project.user_id == current_user.id).first()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Project not found")
+    site = db.query(Site).filter(Site.id == site_id, Site.project_id == project.id).first()
+    if not site:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Site not found")
+    db.delete(site)
+    db.commit()
+    return None

@@ -32,15 +32,25 @@ class ProjectCreate(BaseModel):
     description: Optional[str] = None
 
 
+class ProjectRename(BaseModel):
+    name: str = Field(..., min_length=2)
+
+
 class SiteCreate(BaseModel):
     name: str = Field(..., min_length=2)
     latitude: float = Field(..., ge=-90.0, le=90.0)
     longitude: float = Field(..., ge=-180.0, le=180.0)
     region: str
-    land_area: float = Field(..., gt=0.0)  # in hectares
+    land_area: float = 0.0  # in hectares
     elevation: Optional[float] = 0.0
-    existing_infrastructure: Optional[str] = "Road Access, Substation nearby"
-    land_ownership: str = "Private"
+    existing_infrastructure: Optional[str] = ''
+    land_ownership: str = 'Not Specified'
+    energy_type: str = 'solar'  # 'solar' or 'wind'
+    country: Optional[str] = None
+    state: Optional[str] = None
+    city: Optional[str] = None
+    boundary_type: str = 'point'  # 'point', 'circle', 'rectangle', 'polygon'
+    boundary_coordinates: Optional[str] = None  # JSON string
 
 
 # ── Response schemas ─────────────────────────────────────
@@ -56,6 +66,12 @@ class SiteResponse(BaseModel):
     elevation: Optional[float]
     existing_infrastructure: Optional[str]
     land_ownership: str
+    energy_type: str
+    country: Optional[str]
+    state: Optional[str]
+    city: Optional[str]
+    boundary_type: str
+    boundary_coordinates: Optional[str]
     created_at: datetime
 
     class Config:
