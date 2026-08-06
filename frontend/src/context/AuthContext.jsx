@@ -1,23 +1,46 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiRequest } from '../api/client';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Synchronous initial state from localStorage
+  const [token, setToken] = useState(() => localStorage.getItem('swind_token'));
+  const [user, setUser] = useState(() => {
+    const name = localStorage.getItem('swind_user_name');
+    const email = localStorage.getItem('swind_user_email');
+    return (name && email) ? { name, email } : null;
+  });
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('swind_token'));
   const navigate = useNavigate();
 
+  // Verify JWT Token with FastAPI Backend on App Boot
   useEffect(() => {
     const storedToken = localStorage.getItem('swind_token');
-    const storedName = localStorage.getItem('swind_user_name');
-    const storedEmail = localStorage.getItem('swind_user_email');
     if (storedToken) {
-      setToken(storedToken);
-      setUser({ name: storedName, email: storedEmail });
-      setIsAuthenticated(true);
+      apiRequest('/api/auth/me')
+        .then(userData => {
+          if (userData && userData.email) {
+            setUser(userData);
+            localStorage.setItem('swind_user_name', userData.name || '');
+            localStorage.setItem('swind_user_email', userData.email || '');
+            setIsAuthenticated(true);
+          }
+        })
+        .catch(() => {
+          // Token invalid, expired, or backend restarted -> Clean logout
+          logout();
+        });
     }
+
+    // Event listener for 401 Unauthorized API responses
+    const handleUnauthorized = () => {
+      logout();
+    };
+
+    window.addEventListener('swind:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('swind:unauthorized', handleUnauthorized);
   }, []);
 
   const login = (newToken, newUser) => {
@@ -36,7 +59,6 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
-    navigate('/login');
   };
 
   return (

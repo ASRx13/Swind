@@ -66,6 +66,12 @@ class Site(Base):
     elevation = Column(Float, nullable=True)   # in meters
     existing_infrastructure = Column(String, nullable=True)  # e.g. "Substation within 5km, National Highway"
     land_ownership = Column(String, nullable=False)  # e.g. "Public", "Private", "Commercial", "Leased"
+    energy_type = Column(String(10), nullable=False, default='solar')  # 'solar' or 'wind'
+    country = Column(String, nullable=True)
+    state = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    boundary_type = Column(String, nullable=False, default='point')  # 'point', 'circle', 'rectangle', 'polygon'
+    boundary_coordinates = Column(Text, nullable=True)  # JSON string of boundary coords
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     project = relationship('Project', back_populates='sites')

@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AuthLayout({ leftHeading, leftText, children }) {
   const [logoError, setLogoError] = useState(false);
+  const { darkMode, toggleTheme } = useTheme();
 
   const containerStyle = {
     display: 'flex',
     minHeight: '100vh',
     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
     flexDirection: 'row',
-    backgroundColor: '#0f172a',
+    backgroundColor: darkMode ? '#0f172a' : '#f8fafc',
+    transition: 'background-color 0.3s ease',
   };
 
   const leftPanelStyle = {
@@ -21,9 +24,12 @@ export default function AuthLayout({ leftHeading, leftText, children }) {
     padding: '4rem 3.5rem',
     color: '#fff',
     overflow: 'hidden',
-    backgroundImage: 'linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.85) 100%), url(/auth-bg.jpg)',
+    backgroundImage: darkMode 
+      ? 'linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%), url(/auth-bg-dark.png)' 
+      : 'linear-gradient(180deg, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0.85) 100%), url(/auth-bg.jpg)',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
+    transition: 'background-image 0.5s ease',
   };
 
   const orb1Style = {
@@ -54,7 +60,8 @@ export default function AuthLayout({ leftHeading, leftText, children }) {
 
   const rightPanelStyle = {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: darkMode ? '#1a1a2e' : '#ffffff',
+    color: darkMode ? '#e8eaf0' : '#1e293b',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
@@ -62,6 +69,7 @@ export default function AuthLayout({ leftHeading, leftText, children }) {
     padding: '1.5rem 2rem',
     position: 'relative',
     overflowY: 'auto',
+    transition: 'background-color 0.3s ease, color 0.3s ease',
   };
 
   const formContainerStyle = {
@@ -103,6 +111,35 @@ export default function AuthLayout({ leftHeading, leftText, children }) {
         }
       `}</style>
 
+      {/* Theme Toggle Button at top right of Auth Pages */}
+      <button
+        onClick={toggleTheme}
+        title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+        style={{
+          position: 'absolute',
+          top: '20px',
+          right: '20px',
+          zIndex: 10,
+          width: '38px',
+          height: '38px',
+          borderRadius: '50%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: darkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)',
+          border: darkMode ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.1)',
+          color: darkMode ? '#eab308' : '#64748b',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+        }}
+      >
+        {darkMode ? (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        ) : (
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        )}
+      </button>
+
       {/* Left Panel */}
       <div style={leftPanelStyle} className="auth-left-panel">
         <div style={orb1Style}></div>
@@ -133,14 +170,14 @@ export default function AuthLayout({ leftHeading, leftText, children }) {
       {/* Right Panel */}
       <div style={rightPanelStyle}>
         <div style={formContainerStyle}>
-          {/* Logo Header - Centered above form with tight spacing */}
+          {/* Logo Header - Uses logo-light.png in Light Mode and logo.png in Dark Mode */}
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '1rem' }}>
             <Link to="/" style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '10px' }}>
               {!logoError ? (
                 <img
-                  src="/logo.png"
+                  src={darkMode ? "/logo.png" : "/logo-light.png"}
                   alt="Swind Logo"
-                  style={{ height: '100px', width: 'auto', objectFit: 'contain' }}
+                  style={{ height: '72px', width: 'auto', objectFit: 'contain' }}
                   onError={() => setLogoError(true)}
                 />
               ) : null}
@@ -155,4 +192,3 @@ export default function AuthLayout({ leftHeading, leftText, children }) {
     </div>
   );
 }
-
