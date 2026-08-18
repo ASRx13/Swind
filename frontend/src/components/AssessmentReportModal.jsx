@@ -1,6 +1,7 @@
 import React from 'react';
+import { generateSiteAssessmentPDF } from '../utils/pdfReportGenerator';
 
-export default function AssessmentReportModal({ isOpen, onClose, report }) {
+export default function AssessmentReportModal({ isOpen, onClose, report, projectData }) {
   if (!isOpen || !report) return null;
 
   const {
@@ -67,16 +68,21 @@ export default function AssessmentReportModal({ isOpen, onClose, report }) {
 
         {/* Header */}
         <div style={{ marginBottom: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '1rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.4rem', flexWrap: 'wrap' }}>
             <span style={{ background: 'rgba(74, 144, 217, 0.15)', color: '#4a90d9', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700, fontFamily: 'monospace' }}>
               {project_code}
             </span>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#ffffff' }}>
+            {report.project_name && (
+              <span style={{ background: 'rgba(45, 212, 191, 0.15)', color: '#2dd4bf', padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 700 }}>
+                📁 {report.project_name}
+              </span>
+            )}
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', margin: 0 }}>
               AI Assessment: {site_name}
             </h2>
           </div>
-          <p style={{ color: '#94a3b8', fontSize: '0.88rem' }}>
-            📍 {region} • Coordinates: {coordinates?.latitude?.toFixed(4)}, {coordinates?.longitude?.toFixed(4)} • Land Area: {land_parameters?.land_area_ha} ha
+          <p style={{ color: '#94a3b8', fontSize: '0.88rem', margin: 0 }}>
+            📍 {region} • Coordinates: {coordinates?.latitude?.toFixed(4)}, {coordinates?.longitude?.toFixed(4)}
           </p>
         </div>
 
@@ -188,24 +194,48 @@ export default function AssessmentReportModal({ isOpen, onClose, report }) {
           </div>
         </div>
 
-        {/* Footer Close Button */}
-        <button 
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '0.75rem',
-            background: 'linear-gradient(135deg, #4a90d9 0%, #2dd4bf 100%)',
-            border: 'none',
-            color: '#ffffff',
-            borderRadius: '10px',
-            fontWeight: 600,
-            cursor: 'pointer',
-            fontSize: '0.9rem',
-            boxShadow: '0 4px 15px rgba(74, 144, 217, 0.35)'
-          }}
-        >
-          Close Report
-        </button>
+        {/* Footer Action Buttons */}
+        <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <button 
+            onClick={() => generateSiteAssessmentPDF(report, projectData)}
+            style={{
+              flex: 1,
+              padding: '0.75rem',
+              background: 'linear-gradient(135deg, #10b981 0%, #2dd4bf 100%)',
+              border: 'none',
+              color: '#ffffff',
+              borderRadius: '10px',
+              fontWeight: 700,
+              cursor: 'pointer',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              boxShadow: '0 4px 15px rgba(16, 185, 129, 0.35)'
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF Report
+          </button>
+
+          <button 
+            onClick={onClose}
+            style={{
+              flex: 1,
+              padding: '0.75rem',
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              color: '#ffffff',
+              borderRadius: '10px',
+              fontWeight: 600,
+              cursor: 'pointer',
+              fontSize: '0.9rem'
+            }}
+          >
+            Close Report
+          </button>
+        </div>
       </div>
     </div>
   );

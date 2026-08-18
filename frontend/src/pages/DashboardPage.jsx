@@ -629,6 +629,7 @@ export default function DashboardPage() {
         isOpen={!!assessmentReport}
         onClose={() => setAssessmentReport(null)}
         report={assessmentReport}
+        projectData={projects.find(p => p.id === activeProjectId)}
       />
 
       <ProfileModal
